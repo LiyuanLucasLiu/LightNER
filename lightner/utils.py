@@ -87,7 +87,7 @@ def adjust_learning_rate(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-def read_features(lines, multi_docs = True):
+def read_conll_features(lines, multi_docs = True):
     """
     convert un-annotated corpus into features
     """

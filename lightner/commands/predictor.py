@@ -12,7 +12,7 @@ import itertools
 import sys
 from tqdm import tqdm
 
-from model.crf import CRFDecode
+from lightner.crf_model.crf import CRFDecode
 
 class predict(object):
     """Base class for prediction, provide method to calculate f1 score and accuracy 
@@ -21,23 +21,20 @@ class predict(object):
     ----------
     device: ``torch.device``, required.
         The target device for the dataset loader.
-    l_map: ``dict``, required.
+    y_map: ``dict``, required.
         The dict for label to number.
-    label_seq: ``bool``, optional, (default = True).
+    label_seq: ``str``, optional, (default = "string").
         Whether to decode label sequence or inline marks.
     batch_size: ``int``, optional, (default = 50).
         The batch size for decoding.
     """
 
-    def __init__(self, device, l_map, label_seq = True, batch_size = 50):
+    def __init__(self, device, y_map, label_seq = "string", batch_size = 50):
         self.device = device
-        self.l_map = l_map
-        self.r_l_map = {v: k for k, v in l_map.items()}
+        self.y_map = y_map
+        self.r_y_map = {v: k for k, v in y_map.items()}
         self.batch_size = batch_size
-        if label_seq:
-            self.decode_str = self.decode_l
-        else:
-            self.decode_str = self.decode_s
+        self.decode_str = {"string": self.decode_s, "label": self.decode_l}[label_seq]
 
     def decode_l(self, feature, label):
         """
@@ -50,7 +47,7 @@ class predict(object):
         label: ``list``, required.
             Label list.
         """
-        return '\n'.join(map(lambda t: t[0] + ' '+ self.r_l_map[t[1]], zip(feature, label)))
+        return '\n'.join(map(lambda t: t[0] + ' '+ self.r_y_map[t[1]], zip(feature, label)))
 
     def decode_s(self, feature, label):
         """
@@ -67,7 +64,7 @@ class predict(object):
         current = None
 
         for f, y in zip(feature, label):
-            label = self.r_l_map[y]
+            label = self.r_y_map[y.item()]
 
             if label.startswith('B-'):
 
@@ -137,11 +134,11 @@ class predict(object):
         """
         ner_model.eval()
         d_len = len(documents)
-        output_file = ""
+        output_file = list()
 
         for d_ind in tqdm( range(0, d_len), mininterval=1,
                 desc=' - Process', leave=False, file=sys.stdout):
-            output_file = output_file + '-DOCSTART- -DOCSTART- -DOCSTART-\n\n'
+            tmp_output_file = list()
             features = documents[d_ind]
             f_len = len(features)
             for ind in range(0, f_len, self.batch_size):
@@ -151,8 +148,9 @@ class predict(object):
 
                 for ind2 in range(ind, eind):
                     f = features[ind2]
-                    l = labels[ind2 - ind][0: len(f) ]
-                    output_file = output_file + self.decode_str(features[ind2], l) + '\n\n'
+                    l = labels[ind2 - ind][0: len(f)]
+                    tmp_output_file.append(self.decode_str(features[ind2], l))
+            output_file.append(tmp_output_file)
 
         return output_file
         
@@ -173,7 +171,7 @@ class predict_wc(predict):
         if_cuda: if use cuda to speed up 
         f_map: dictionary for words
         c_map: dictionary for chars
-        l_map: dictionary for labels
+        y_map: dictionary for labels
         pad_word: word padding
         pad_char: word padding
         pad_label: label padding
@@ -191,8 +189,8 @@ class predict_wc(predict):
             y_map: dict,
             label_seq: bool = True,
             batch_size: int = 50):
-        predict.__init__(self, device, l_map, label_seq, batch_size)
-        self.decoder = CRFDecode(l_map)
+        predict.__init__(self, device, y_map, label_seq, batch_size)
+        self.decoder = CRFDecode(y_map)
         self.flm_map = flm_map
         self.blm_map = blm_map
         self.gw_map = gw_map
@@ -209,18 +207,18 @@ class predict_wc(predict):
         self.flm_pad = flm_map['\n']
         self.blm_pad = blm_map['\n']
 
-    def apply_model(self, ner_model, features):
+    def apply_model(self, seq_model, features):
         """
         apply_model function for LM-LSTM-CRF
 
         args:
-            ner_model: sequence labeling model
+            seq_model: sequence labeling model
             feature (list): list of words list
         """
         cur_batch_size = len(features)
 
         char_len = [[len(tup) + 1 for tup in sentence] for sentence in features]
-        char_inses = [tup for sentence in features for tup in (sentence + ' ')]
+        char_inses = [' '.join(sentence)+' ' for sentence in features]
 
         char_padded_len = max([len(tup) for tup in char_inses])
         word_padded_len = max([len(tup) for tup in features])
@@ -229,20 +227,21 @@ class predict_wc(predict):
 
         for instance_ind in range(cur_batch_size):
 
+            char_len_ins = char_len[instance_ind]
             char_f = [self.c_map.get(tup, self.c_unk) for tup in char_inses[instance_ind]]
-            gw_f = [self.w_map.get(tup, self.gw_unk) for tup in features[instance_ind]]
+            gw_f = [self.gw_map.get(tup, self.gw_unk) for tup in features[instance_ind]]
             flm_f = [self.flm_map.get(tup, self.flm_unk) for tup in features[instance_ind]]
             blm_f = [self.blm_map.get(tup, self.blm_unk) for tup in features[instance_ind]]
 
             char_padded_len_ins = char_padded_len - len(char_f)
-            word_padded_len_ins = word_padded_len - len(word_f)
+            word_padded_len_ins = word_padded_len - len(gw_f)
 
             tmp_batch[0].append(char_f + [self.c_pad] + [self.c_pad] * char_padded_len_ins)
             tmp_batch[2].append([self.c_pad] + char_f[::-1] + [self.c_pad] * char_padded_len_ins)
 
-            tmp_p = list( itertools.accumulate(char_len+[1]+[0]* word_padded_len_ins) )
+            tmp_p = list( itertools.accumulate(char_len_ins+[1]+[0]* word_padded_len_ins) )
             tmp_batch[1].append([(x - 1) * cur_batch_size + instance_ind for x in tmp_p])
-            tmp_p = list(itertools.accumulate([1]+char_len[::-1]))[::-1] + [1]*word_padded_len_ins
+            tmp_p = list(itertools.accumulate([1]+char_len_ins[::-1]))[::-1] + [1]*word_padded_len_ins
             tmp_batch[3].append([(x - 1) * cur_batch_size + instance_ind for x in tmp_p])
 
             tmp_batch[4].append(gw_f + [self.gw_pad] + [self.gw_pad] * word_padded_len_ins)
@@ -261,7 +260,7 @@ class predict_wc(predict):
         tbt[3] = tbt[3].view(-1)
         tbt[7] = tbt[7].view(-1)
 
-        f_c, f_p, b_c, b_p, f_w, flm_w, blm_w, blm_ind, mask_v = [ten.to(device) for ten in tbt]
+        f_c, f_p, b_c, b_p, f_w, flm_w, blm_w, blm_ind, mask_v = [ten.to(self.device) for ten in tbt]
 
         scores = seq_model(f_c, f_p, b_c, b_p, f_w, flm_w, blm_w, blm_ind)
         

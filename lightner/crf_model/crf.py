@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.sparse as sparse
-import model_seq.utils as utils
+import lightner.utils as utils
 
 class CRF(nn.Module):
     """

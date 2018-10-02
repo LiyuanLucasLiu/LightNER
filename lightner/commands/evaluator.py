@@ -8,7 +8,7 @@ import torch
 import numpy as np
 import itertools
 
-import model_seq.utils as utils
+import lightner.utils as utils
 from torch.autograd import Variable
 
 class eval_batch:

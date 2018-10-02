@@ -7,9 +7,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import model_seq.utils as utils
-from model_seq.crf import CRF
-from model_seq.denselm import DenseLM
+import lightner.utils as utils
+from lightner.crf_model.crf import CRF
+from lightner.crf_model.denselm import DenseLM
 
 class SeqLabel(nn.Module):
     """
@@ -83,10 +83,11 @@ class SeqLabel(nn.Module):
         self.char_bw = rnnunit_map[unit](c_dim, c_hidden, c_layer, dropout = tmp_rnn_dropout)
 
         tmp_rnn_dropout = droprate if w_layer > 1 else 0
-        self.word_rnn = rnnunit_map[unit](w_dim * input_count, w_hidden // 2, w_layer, dropout = tmp_rnn_dropout, bidirectional = True)
+        self.word_rnn = rnnunit_map[unit](w_dim * input_count, w_hidden, w_layer, dropout = tmp_rnn_dropout, bidirectional = True)
 
         self.y_num = y_num
-        self.crf = CRF(w_hidden, y_num)
+
+        self.crf = CRF(w_hidden * 2, y_num)
 
         self.drop = nn.Dropout(p = droprate)
 
@@ -95,6 +96,7 @@ class SeqLabel(nn.Module):
         To parameters.
         """
         return {
+            "model_type": "char-lstm-crf",
             "forward_lm": self.f_lm.to_params() if self.f_lm else None,
             "backward_lm": self.b_lm.to_params() if self.b_lm else None,
             "word_embed_num": self.word_embed.num_embeddings,
@@ -129,14 +131,15 @@ class SeqLabel(nn.Module):
             blm = None
 
         return SeqLabel(flm, blm,
-            config['word_embed_num'],
-            config['word_embed_dim'],
+            config['char_embed_num'],
+            config['char_embed_dim'],
             config['char_hidden'],
             config['char_layers'],
             config['word_embed_num'],
             config['word_embed_dim'],
             config['word_hidden'],
             config['word_layers'],
+            config['y_num'],
             config['droprate'],
             config.get('unit_type', 'lstm'))
 
@@ -190,15 +193,14 @@ class SeqLabel(nn.Module):
 
         f_c_e, _ = self.char_fw(f_c_e)
         b_c_e, _ = self.char_bw(b_c_e)
-
+        f_c_e = f_c_e.view(-1, self.c_hidden).index_select(0, f_p).view(self.word_seq_length, self.batch_size, self.c_hidden)
+        b_c_e = b_c_e.view(-1, self.c_hidden).index_select(0, b_p).view(self.word_seq_length, self.batch_size, self.c_hidden)    
         c_o = self.drop(torch.cat([f_c_e, b_c_e], dim = 2))
         c_o = self.char_seq(c_o)
 
         w_e = self.word_embed(f_w)
 
-        if flm_w and self.f_lm and blm_w and self.b_lm:
-            f_c_e = f_c_e.view(-1, self.c_hidden).index_select(0, f_p).view(self.word_seq_length, self.batch_size, self.c_hidden)
-            b_c_e = b_c_e.view(-1, self.c_hidden).index_select(0, b_p).view(self.word_seq_length, self.batch_size, self.c_hidden)
+        if flm_w is not None and self.f_lm and blm_w is not None and self.b_lm:
             self.f_lm.init_hidden()
             self.b_lm.init_hidden()
             f_lm_e = self.f_lm(flm_w)

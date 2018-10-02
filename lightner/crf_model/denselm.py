@@ -9,7 +9,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import model_seq.utils as utils
+import lightner.utils as utils
 
 class SBUnit(nn.Module):
     """
@@ -100,13 +100,20 @@ class SDRNN(nn.Module):
         super(SDRNN, self).__init__()
 
         self.unit_type = unit
+        self.layer_list = [SBUnit(unit, emb_dim + i * hid_dim, hid_dim, droprate) for i in range(layer_num)]
         self.output_dim = self.layer_list[-1].output_dim if layer_num > 0 else emb_dim
-        self.layer_list = [BasicUnit(unit, emb_dim + i * hid_dim, hid_dim, droprate) for i in range(layer_num)]
 
         self.layer = nn.Sequential(*self.layer_list)
         self.weight_list = nn.Parameter(torch.FloatTensor([1.0] * len(self.layer_list))) if (layer_num > 0 and after_pruned) else None
 
         self.init_hidden()
+
+    def init_hidden(self):
+        """
+        Initialize hidden states.
+        """
+        for tup in self.layer_list:
+            tup.init_hidden()
 
     def to_params(self):
         """
@@ -210,7 +217,7 @@ class DenseLM(nn.Module):
         self.w_dim = word_embed_dim
         self.word_embed = nn.Embedding(word_embed_num, word_embed_dim)
 
-        self.output_dim = ori_lm.rnn_output
+        self.output_dim = rnn.output_dim
 
         self.backward = backward
 
@@ -248,7 +255,7 @@ class DenseLM(nn.Module):
         """
         initialize hidden states.
         """
-        return
+        self.rnn.init_hidden()
 
     def regularizer(self):
         """

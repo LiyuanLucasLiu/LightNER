@@ -1,2 +1,2 @@
-# NamedEntityTagger
+# LightNER
 Conduct inference with models pre-trained by LD-Net / AutoNER / VanillaNER / ...

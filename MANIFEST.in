@@ -1,0 +1,11 @@
+# Include the README
+include *.md
+
+# Include the license file
+include LICENSE.txt
+
+# Include the history
+include HISTORY.rst
+
+# Include the script
+include bin/light_ner
