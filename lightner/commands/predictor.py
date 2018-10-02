@@ -12,6 +12,7 @@ import itertools
 import sys
 from tqdm import tqdm
 
+# from ipdb import set_trace
 from lightner.crf_model.crf import CRFDecode
 
 class predict(object):
@@ -129,18 +130,25 @@ class predict(object):
         ner_model: ``nn.Module``, required.
             Sequence labeling model.
         feature: ``list``, required.
-            List of list of str (list of documents, which is list of sentences, which is list of str).
-            Or just list of str.
+            List of list of list of str (list of documents, which is list of sentences, which is list of str).
+            Or list of list of str.
+            Or list of str.
         """
         if not documents or 0 == len(documents):
             return list()
 
         ner_model.eval()
-        output_file = list()
 
-        if type(documents[0]) == str:
+        if type(documents[0]) != list:
 
-            tmp_output_file = list()
+            label = self.apply_model(ner_model, [documents])
+            label = torch.unbind(label, 1)[0]
+            label = label[0: len(documents)]
+            output_file = self.decode_str(documents, label)
+
+        elif type(documents[0][0]) != list:
+
+            output_file = list()
             features = documents
             f_len = len(features)
             for ind in range(0, f_len, self.batch_size):
@@ -150,11 +158,11 @@ class predict(object):
                 for ind2 in range(ind, eind):
                     f = features[ind2]
                     l = labels[ind2 - ind][0: len(f)]
-                    tmp_output_file.append(self.decode_str(features[ind2], l))
-            output_file.append(tmp_output_file)
+                    output_file.append(self.decode_str(features[ind2], l))
 
-        elif type(documents[0]) == list:
+        elif type(documents[0][0][0]) != list:
 
+            output_file = list()
             d_len = len(documents)
             for d_ind in tqdm( range(0, d_len), mininterval=1,
                     desc=' - Process', leave=False, file=sys.stdout):
@@ -173,7 +181,7 @@ class predict(object):
                 output_file.append(tmp_output_file)
 
         else:
-            print("Wrong Format! Only list of str or list of list of str are accepted.")
+            print("Wrong Format! Only list of str, list of list of str or list of list of list of str are accepted.")
 
         return output_file
         
