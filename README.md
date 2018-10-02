@@ -34,6 +34,13 @@ python setup.py install
 
 ## Usage
 
+### Pre-trained Models
+
+|               | NER             | NP            |
+| ------------- |-------------    | ------------- |
+| LD-Net        | [pner1.th](http://dmserv4.cs.illinois.edu/pner1.th) | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th) |
+...
+
 ### Decode API
 
 The decode api can be called in the following way:
