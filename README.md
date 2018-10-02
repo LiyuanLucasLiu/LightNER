@@ -1,7 +1,7 @@
 # LightNER
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![PyPI version](https://badge.fury.io/py/torch-scope.svg)](https://badge.fury.io/py/LightNER)
+[![PyPI version](https://badge.fury.io/py/lightner.svg)](https://badge.fury.io/py/LightNER)
 <!-- [![Documentation Status](https://readthedocs.org/projects/tensorboard-wrapper/badge/?version=latest)](http://tensorboard-wrapper.readthedocs.io/en/latest/?badge=latest) -->
 <!-- [![Downloads](https://pepy.tech/badge/torch-scope)](https://pepy.tech/project/LightNER) -->
 
