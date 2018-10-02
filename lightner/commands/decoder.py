@@ -10,6 +10,18 @@ import numpy as np
 DEFAULT_BATCH_SIZE = 50
 
 class decoder_wc(object):
+    """
+    Decode function for char-lstm-crf model.
+
+    Parameters
+    ----------
+    model_file: ``dict``, required.
+        Loaded checkpoint.
+    pw: ``wrapper``, required.
+        torch_scope wrapper for logging.
+    configs: ``dict``, optional, (default = "{}").
+        Additional configs.
+    """
     def __init__(self,
                 model_file: dict,
                 pw: wrapper,
@@ -38,10 +50,28 @@ class decoder_wc(object):
         self.pw.info('Model is ready.')
 
     def decode(self, documents):
+        """
+        Decode documents.
+
+        Parameters
+        ----------
+        documents: ``list``, required.
+            List of str or list of list of str.
+        """
         self.seq_model.eval()
         return self.predictor.output_batch(self.seq_model, documents)
 
 def decoder_wrapper(model_file_path: str, configs: dict = {}):
+    """
+    Wrapper for different decode functions.
+
+    Parameters
+    ----------
+    model_file_path: ``str``, required.
+        Path to loaded checkpoint.
+    configs: ``dict``, optional, (default = "{}").
+        Additional configs.
+    """
     model_file = wrapper.restore_checkpoint(model_file_path)
 
     pw = wrapper(configs.get("log_path", None))
@@ -55,15 +85,18 @@ def decoder_wrapper(model_file_path: str, configs: dict = {}):
     return model_type_dict[model_type](model_file, pw, configs)
 
 class decode():
+    """
+    Function for the subcommand.
+    """
     def add_subparser(self, name, parser):
         subparser = parser.add_parser(name, description="Decode raw corpus into a file", help='Decode raw corpus')
-        subparser.add_argument('--model_file', type=str, required=True, help="Path to pre-trained model")
-        subparser.add_argument('--gpu', type=str, default="auto", help="Device choice (default: 'auto')")
-        subparser.add_argument('--decode_type', choices=['label', 'string'], default='string', help="The type of decoding object")
-        subparser.add_argument('--batch_size', type=int, default=50, help="The size of batch")
-        subparser.add_argument('--input_file', type=str, default='data/ner2003/test.txt', help="The path to the input file.")
-        subparser.add_argument('--file_format', type=str, default="conll", help="The format of input files.")
-        subparser.add_argument('--output_file', type=str, default='output.txt', help="The path to the output file.")
+        subparser.add_argument('-m', '--model_file', type=str, required=True, help="Path to pre-trained model")
+        subparser.add_argument('-g', '--gpu', type=str, default="auto", help="Device choice (default: 'auto')")
+        subparser.add_argument('-d', '--decode_type', choices=['label', 'string'], default='string', help="The type of decoding object")
+        subparser.add_argument('-b', '--batch_size', type=int, default=50, help="The size of batch")
+        subparser.add_argument('-i', '--input_file', type=str, default='data/ner2003/test.txt', help="The path to the input file.")
+        subparser.add_argument('-f', '--file_format', type=str, default="conll", help="The format of input files.")
+        subparser.add_argument('-o', '--output_file', type=str, default='output.txt', help="The path to the output file.")
         subparser.add_argument('--log_path', type=str, default=None, help="The path to the log folder.")
         subparser.add_argument('--log_level', type=str, default="info", help="The level of logging.")
         subparser.set_defaults(func=decode_file)
@@ -71,7 +104,9 @@ class decode():
         return subparser
 
 def decode_file(args):
-
+    """
+    Decode file handler function.
+    """
     configs = vars(args)
 
     decoder = decoder_wrapper(configs['model_file'], configs)

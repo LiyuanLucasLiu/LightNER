@@ -24,7 +24,9 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     license='Apache License 2.0',
-    scripts=["bin/light_ner"],
+    entry_points={
+        'console_scripts': ['lightner=lightner.commands.main:main'],
+    },
     zip_safe=False,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

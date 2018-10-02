@@ -28,7 +28,6 @@ class predict(object):
     batch_size: ``int``, optional, (default = 50).
         The batch size for decoding.
     """
-
     def __init__(self, device, y_map, label_seq = "string", batch_size = 50):
         self.device = device
         self.y_map = y_map
@@ -130,27 +129,51 @@ class predict(object):
         ner_model: ``nn.Module``, required.
             Sequence labeling model.
         feature: ``list``, required.
-            List of list of words (list of documents, which is list of sentences, which is list of words).
+            List of list of str (list of documents, which is list of sentences, which is list of str).
+            Or just list of str.
         """
+        if not documents or 0 == len(documents):
+            return list()
+
         ner_model.eval()
-        d_len = len(documents)
         output_file = list()
 
-        for d_ind in tqdm( range(0, d_len), mininterval=1,
-                desc=' - Process', leave=False, file=sys.stdout):
+        if type(documents[0]) == str:
+
             tmp_output_file = list()
-            features = documents[d_ind]
+            features = documents
             f_len = len(features)
             for ind in range(0, f_len, self.batch_size):
                 eind = min(f_len, ind + self.batch_size)
                 labels = self.apply_model(ner_model, features[ind: eind])
                 labels = torch.unbind(labels, 1)
-
                 for ind2 in range(ind, eind):
                     f = features[ind2]
                     l = labels[ind2 - ind][0: len(f)]
                     tmp_output_file.append(self.decode_str(features[ind2], l))
             output_file.append(tmp_output_file)
+
+        elif type(documents[0]) == list:
+
+            d_len = len(documents)
+            for d_ind in tqdm( range(0, d_len), mininterval=1,
+                    desc=' - Process', leave=False, file=sys.stdout):
+                tmp_output_file = list()
+                features = documents[d_ind]
+                f_len = len(features)
+                for ind in range(0, f_len, self.batch_size):
+                    eind = min(f_len, ind + self.batch_size)
+                    labels = self.apply_model(ner_model, features[ind: eind])
+                    labels = torch.unbind(labels, 1)
+
+                    for ind2 in range(ind, eind):
+                        f = features[ind2]
+                        l = labels[ind2 - ind][0: len(f)]
+                        tmp_output_file.append(self.decode_str(features[ind2], l))
+                output_file.append(tmp_output_file)
+
+        else:
+            print("Wrong Format! Only list of str or list of list of str are accepted.")
 
         return output_file
         
