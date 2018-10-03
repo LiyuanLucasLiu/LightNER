@@ -16,3 +16,7 @@ History
 0.1.1 (2018-10-03)
 ------------------
 * Speed up for smaller documents.
+
+0.1.1 (2018-10-03)
+------------------
+* Update ReadMe and commands order.
