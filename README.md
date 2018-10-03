@@ -54,7 +54,7 @@ The ```decode()``` method also can conduct decoding at document level (takes lis
 
 The ```decoder_wrapper``` method can be customized by choosing a different pre-trained model or passing an additional ```configs``` file as:
 ```
-model = decoder_wrapper(PATH_TO_CHECKPOINT, configs)
+model = decoder_wrapper(URL_OR_PATH_TO_CHECKPOINT, configs)
 ```
 And you can access the config options by:
 ```
