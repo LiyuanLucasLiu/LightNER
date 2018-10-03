@@ -46,13 +46,13 @@ python setup.py install
 The decode api can be called in the following way:
 ```
 from lightner import decoder_wrapper
-model = decoder_wrapper(PATH_TO_CHECKPOINT)
+model = decoder_wrapper()
 model.decode(["Ronaldo", "won", "'t", "score", "more", "than", "30", "goals", "for", "Juve", "."])
 ```
 
 The ```decode()``` method also can conduct decoding at document level (takes list of list of ```str``` as input) or corpus level (takes list of list of list of ```str``` as input).
 
-The ```decoder_wrapper``` method can be customized by passing an additional ```configs``` file as:
+The ```decoder_wrapper``` method can be customized by choosing a different pre-trained model or passing an additional ```configs``` file as:
 ```
 model = decoder_wrapper(PATH_TO_CHECKPOINT, configs)
 ```
