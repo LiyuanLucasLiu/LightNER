@@ -38,7 +38,7 @@ python setup.py install
 
 |               | NER             | NP            |
 | ------------- |-------------    | ------------- |
-| LD-Net        | [pner1.th](http://dmserv4.cs.illinois.edu/pner1.th) | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th) |
+| LD-Net        | [pner0.th](http://dmserv4.cs.illinois.edu/pner0.th) | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th) |
 ...
 
 ### Decode API
