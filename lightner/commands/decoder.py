@@ -3,8 +3,8 @@ from lightner.crf_model.seqlabel import SeqLabel
 from lightner.commands.predictor import predict_wc
 from lightner.utils import read_conll_features 
 
-import codecs
 import torch
+import codecs
 import numpy as np
 
 DEFAULT_BATCH_SIZE = 50
@@ -72,16 +72,16 @@ def decoder_wrapper(model_file_path: str, configs: dict = {}):
     configs: ``dict``, optional, (default = "{}").
         Additional configs.
     """
-    model_file = wrapper.restore_checkpoint(model_file_path)
 
     pw = wrapper(configs.get("log_path", None))
     pw.set_level(configs.get("log_level", 'info'))
 
+    pw.info("Loading model from {} (might download from source if not cached).".format(model_file_path))
+    model_file = wrapper.restore_checkpoint(model_file_path)
+
     model_type = configs.get("model_type", 'char-lstm-crf')
     pw.info('Preparing the pre-trained {} model.'.format(model_type))
-
     model_type_dict = {"char-lstm-crf": decoder_wc}
-
     return model_type_dict[model_type](model_file, pw, configs)
 
 class decode():
@@ -90,7 +90,7 @@ class decode():
     """
     def add_subparser(self, name, parser):
         subparser = parser.add_parser(name, description="Decode raw corpus into a file", help='Decode raw corpus')
-        subparser.add_argument('-m', '--model_file', type=str, required = True, help="Path to pre-trained model")
+        subparser.add_argument('-m', '--model_file', type=str, default="http://dmserv4.cs.illinois.edu/pner0.th", help="Path to pre-trained model")
         subparser.add_argument('-g', '--gpu', type=str, default="auto", help="Device choice (default: 'auto')")
         subparser.add_argument('-d', '--decode_type', choices=['label', 'string'], default='string', help="The type of decoding object")
         subparser.add_argument('-b', '--batch_size', type=int, default=50, help="The size of batch")
