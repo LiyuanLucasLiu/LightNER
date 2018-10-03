@@ -61,18 +61,18 @@ class decoder_wc(object):
         self.seq_model.eval()
         return self.predictor.output_batch(self.seq_model, documents)
 
-def decoder_wrapper(model_file_path: str, configs: dict = {}):
+def decoder_wrapper(model_file_path: str = "http://dmserv4.cs.illinois.edu/pner0.th", 
+                    configs: dict = {}):
     """
     Wrapper for different decode functions.
 
     Parameters
     ----------
-    model_file_path: ``str``, required.
+    model_file_path: ``str``, optional, (default = "http://dmserv4.cs.illinois.edu/pner0.th").
         Path to loaded checkpoint.
     configs: ``dict``, optional, (default = "{}").
         Additional configs.
     """
-
     pw = wrapper(configs.get("log_path", None))
     pw.set_level(configs.get("log_level", 'info'))
 

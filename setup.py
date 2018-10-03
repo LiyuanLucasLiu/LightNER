@@ -14,7 +14,7 @@ requirements = [
 
 setup(
     name='LightNER',
-    version='0.1.0',
+    version='0.1.1',
     description='A Toolkit for Pre-trained Sequence Labeling Models Inference',
     long_description= history,
     author='Lucas Liu',

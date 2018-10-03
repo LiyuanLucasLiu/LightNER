@@ -12,7 +12,6 @@ import itertools
 import sys
 from tqdm import tqdm
 
-# from ipdb import set_trace
 from lightner.crf_model.crf import CRFDecode
 
 class predict(object):
@@ -151,7 +150,7 @@ class predict(object):
             output_file = list()
             features = documents
             f_len = len(features)
-            for ind in range(0, f_len, self.batch_size):
+            for ind in tqdm(range(0, f_len, self.batch_size)):
                 eind = min(f_len, ind + self.batch_size)
                 labels = self.apply_model(ner_model, features[ind: eind])
                 labels = torch.unbind(labels, 1)
@@ -162,23 +161,24 @@ class predict(object):
 
         elif type(documents[0][0][0]) != list:
 
-            output_file = list()
-            d_len = len(documents)
-            for d_ind in tqdm( range(0, d_len), mininterval=1,
-                    desc=' - Process', leave=False, file=sys.stdout):
-                tmp_output_file = list()
-                features = documents[d_ind]
-                f_len = len(features)
-                for ind in range(0, f_len, self.batch_size):
-                    eind = min(f_len, ind + self.batch_size)
-                    labels = self.apply_model(ner_model, features[ind: eind])
-                    labels = torch.unbind(labels, 1)
+            tmp_output_file = list()
+            document_len = [0] + [len(doc) for doc in documents]
+            flat_sent = [sent for doc in documents for sent in doc]
+            f_len = len(flat_sent)
+            assert (sum(document_len) == f_len)
+            document_len = list(itertools.accumulate(document_len))
 
-                    for ind2 in range(ind, eind):
-                        f = features[ind2]
-                        l = labels[ind2 - ind][0: len(f)]
-                        tmp_output_file.append(self.decode_str(features[ind2], l))
-                output_file.append(tmp_output_file)
+            for ind in tqdm(range(0, f_len, self.batch_size)):
+                eind = min(f_len, ind + self.batch_size)
+                labels = self.apply_model(ner_model, flat_sent[ind: eind])
+                labels = torch.unbind(labels, 1)
+                for ind2 in range(ind, eind):
+                    f = flat_sent[ind2]
+                    l = labels[ind2 - ind][0: len(f)]
+                    tmp_output_file.append(self.decode_str(flat_sent[ind2], l))
+
+            output_file = [tmp_output_file[document_len[ind]: document_len[ind+1]] \
+                                for ind in range(len(document_len) - 1)]
 
         else:
             print("Wrong Format! Only list of str, list of list of str or list of list of list of str are accepted.")
