@@ -83,12 +83,10 @@ class eval_batch:
         """
         calculate the f1 score based on the inner counter.
         """
-        if self.guess_count == 0:
+        if self.guess_count == 0 or self.gold_count == 0 or self.overlap_count:
             return 0.0, 0.0, 0.0, 0.0
         precision = self.overlap_count / float(self.guess_count)
         recall = self.overlap_count / float(self.gold_count)
-        if precision == 0.0 or recall == 0.0:
-            return 0.0, 0.0, 0.0, 0.0
         f = 2 * (precision * recall) / (precision + recall)
         accuracy = float(self.correct_labels) / self.total_labels
         return f, precision, recall, accuracy
@@ -100,7 +98,7 @@ class eval_batch:
         if 0 == self.total_labels:
             return 0.0
         accuracy = float(self.correct_labels) / self.total_labels
-        return accuracy        
+        return accuracy
 
     def eval_instance(self, best_path, gold):
         """
