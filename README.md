@@ -5,7 +5,10 @@
 <!-- [![Documentation Status](https://readthedocs.org/projects/tensorboard-wrapper/badge/?version=latest)](http://tensorboard-wrapper.readthedocs.io/en/latest/?badge=latest) -->
 <!-- [![Downloads](https://pepy.tech/badge/torch-scope)](https://pepy.tech/project/LightNER) -->
 
-A Toolkit to conduct inference with models pre-trained by LD-Net / AutoNER / VanillaNER / ...
+A Toolkit to conduct inference with models pre-trained by:
+- [Vanilla_NER](https://github.com/LiyuanLucasLiu/Vanilla_NER): vanilla sequence labeling models.
+- [LD-Net](https://github.com/LiyuanLucasLiu/LD-Net): sequence labeling models w. efficient contextualized representation.
+- (*in progress*) [AutoNER](https://github.com/shangjingbo1226/AutoNER): distant supervised named entity recognition models (*no line-by-line annotations*).
 
 We are in an early-release beta. Expect some adventures and rough edges.
 
