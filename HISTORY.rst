@@ -20,3 +20,7 @@ History
 0.1.1 (2018-10-03)
 ------------------
 * Update ReadMe and commands order.
+
+0.1.2 (2018-10-03)
+------------------
+* Support inference for Char-LSTM-CRF (Vanilla-NER).

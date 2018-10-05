@@ -213,30 +213,32 @@ class predict_wc(predict):
     """
    
     def __init__(self, device,
-            flm_map: dict, 
-            blm_map: dict, 
             gw_map: dict, 
             c_map: dict, 
             y_map: dict,
             label_seq: bool = True,
-            batch_size: int = 50):
+            batch_size: int = 50,
+            flm_map: dict = None, 
+            blm_map: dict = None):
         predict.__init__(self, device, y_map, label_seq, batch_size)
         self.decoder = CRFDecode(y_map)
-        self.flm_map = flm_map
-        self.blm_map = blm_map
         self.gw_map = gw_map
         self.c_map = c_map
         self.y_map = y_map
+        self.flm_map = flm_map
+        self.blm_map = blm_map
 
         self.c_unk = c_map['<unk>']
-        self.flm_unk = flm_map['<unk>']
-        self.blm_unk = blm_map['<unk>']
         self.gw_unk = gw_map['<unk>']
 
         self.c_pad = c_map['\n']
         self.gw_pad = gw_map['<\n>']
-        self.flm_pad = flm_map['\n']
-        self.blm_pad = blm_map['\n']
+
+        if flm_map and blm_map:
+            self.flm_unk = flm_map['<unk>']
+            self.blm_unk = blm_map['<unk>']
+            self.flm_pad = flm_map['\n']
+            self.blm_pad = blm_map['\n']
 
     def apply_model(self, seq_model, features):
         """
@@ -254,15 +256,15 @@ class predict_wc(predict):
         char_padded_len = max([len(tup) for tup in char_inses])
         word_padded_len = max([len(tup) for tup in features])
 
-        tmp_batch =  [list() for ind in range(11)]
+        tmp_batch =  [list() for ind in range(6)]
+        if self.flm_map and self.blm_map:
+            lm_batch = [list() for ind in range(3)]
 
         for instance_ind in range(cur_batch_size):
 
             char_len_ins = char_len[instance_ind]
             char_f = [self.c_map.get(tup, self.c_unk) for tup in char_inses[instance_ind]]
             gw_f = [self.gw_map.get(tup, self.gw_unk) for tup in features[instance_ind]]
-            flm_f = [self.flm_map.get(tup, self.flm_unk) for tup in features[instance_ind]]
-            blm_f = [self.blm_map.get(tup, self.blm_unk) for tup in features[instance_ind]]
 
             char_padded_len_ins = char_padded_len - len(char_f)
             word_padded_len_ins = word_padded_len - len(gw_f)
@@ -277,21 +279,29 @@ class predict_wc(predict):
 
             tmp_batch[4].append(gw_f + [self.gw_pad] + [self.gw_pad] * word_padded_len_ins)
 
-            tmp_batch[5].append(flm_f + [self.flm_pad] + [self.flm_pad] * word_padded_len_ins)
-            tmp_batch[6].append([self.blm_pad] + blm_f[::-1] + [self.blm_pad] * word_padded_len_ins)
+            tmp_batch[5].append([1] * len(gw_f) + [1] + [0] * word_padded_len_ins)
 
-            tmp_p = list(range(len(blm_f), -1, -1)) + list(range(len(blm_f)+1, word_padded_len+1))
-            tmp_batch[7].append([x * cur_batch_size + instance_ind for x in tmp_p])
+            if self.flm_map and self.blm_map:
+                flm_f = [self.flm_map.get(tup, self.flm_unk) for tup in features[instance_ind]]
+                blm_f = [self.blm_map.get(tup, self.blm_unk) for tup in features[instance_ind]]
+                tmp_batch[0].append(flm_f + [self.flm_pad] + [self.flm_pad] * word_padded_len_ins)
+                tmp_batch[1].append([self.blm_pad] + blm_f[::-1] + [self.blm_pad] * word_padded_len_ins)
 
-            tmp_batch[8].append([1] * len(gw_f) + [1] + [0] * word_padded_len_ins)
+                tmp_p = list(range(len(blm_f), -1, -1)) + list(range(len(blm_f)+1, word_padded_len+1))
+                tmp_batch[2].append([x * cur_batch_size + instance_ind for x in tmp_p])
 
-        tbt = [torch.LongTensor(v).transpose(0, 1).contiguous() for v in tmp_batch[0:8]] + [torch.ByteTensor(tmp_batch[8]).transpose(0, 1).contiguous()]
 
+        tbt = [torch.LongTensor(v).transpose(0, 1).contiguous() for v in tmp_batch[0:5]] + [torch.ByteTensor(tmp_batch[5]).transpose(0, 1).contiguous()]
         tbt[1] = tbt[1].view(-1)
         tbt[3] = tbt[3].view(-1)
-        tbt[7] = tbt[7].view(-1)
+        f_c, f_p, b_c, b_p, f_w, mask_v = [ten.to(self.device) for ten in tbt]
 
-        f_c, f_p, b_c, b_p, f_w, flm_w, blm_w, blm_ind, mask_v = [ten.to(self.device) for ten in tbt]
+        if self.flm_map and self.blm_map:
+            tbt = [torch.LongTensor(v).transpose(0, 1).contiguous() for v in lm_batch]
+            tbt[2] = tbt[2].view(-1)
+            flm_w, blm_w, blm_ind = [ten.to(self.device) for ten in tbt]
+        else:
+            flm_w, blm_w, blm_ind = None, None, None
 
         scores = seq_model(f_c, f_p, b_c, b_p, f_w, flm_w, blm_w, blm_ind)
         
