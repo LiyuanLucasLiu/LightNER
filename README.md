@@ -5,7 +5,18 @@
 <!-- [![Documentation Status](https://readthedocs.org/projects/tensorboard-wrapper/badge/?version=latest)](http://tensorboard-wrapper.readthedocs.io/en/latest/?badge=latest) -->
 <!-- [![Downloads](https://pepy.tech/badge/torch-scope)](https://pepy.tech/project/LightNER) -->
 
-A Toolkit to conduct inference with models pre-trained by:
+**Check Our New NER Toolkit🚀🚀🚀**
+- **Inference**:
+  - **[LightNER](https://github.com/LiyuanLucasLiu/LightNER)**: inference w. models pre-trained / trained w. *any* following tools, *efficiently*. 
+- **Training**:
+  - **[LD-Net](https://github.com/LiyuanLucasLiu/LD-Net)**: train NER models w. efficient contextualized representations.
+  - **[VanillaNER](https://github.com/LiyuanLucasLiu/Vanilla_NER)**: train vanilla NER models w. pre-trained embedding.
+- **Distant Training**:
+  - **[AutoNER](https://shangjingbo1226.github.io/AutoNER/)**: train NER models w.o. line-by-line annotations and get competitive performance.
+
+--------------------------------
+
+This package supports to conduct inference with models pre-trained by:
 - [Vanilla_NER](https://github.com/LiyuanLucasLiu/Vanilla_NER): vanilla sequence labeling models.
 - [LD-Net](https://github.com/LiyuanLucasLiu/LD-Net): sequence labeling models w. efficient contextualized representation.
 - [AutoNER](https://github.com/shangjingbo1226/AutoNER): distant supervised named entity recognition models (*no line-by-line annotations for training*).
