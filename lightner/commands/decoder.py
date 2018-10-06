@@ -1,6 +1,11 @@
 from torch_scope import wrapper
+
 from lightner.crf_model.seqlabel import SeqLabel 
-from lightner.commands.predictor import predict_wc
+from lightner.crf_model.predictor import predict_wc
+
+from lightner.two_level_model.predictor import predict_wc_tl
+from lightner.two_level_model.autoner import AutoNER
+
 from lightner.utils import read_conll_features 
 
 import torch
@@ -9,7 +14,92 @@ import numpy as np
 
 DEFAULT_BATCH_SIZE = 50
 
-class decoder_wc(object):
+class decoder(object):
+    """
+    Abstract class for decoder..
+
+    Parameters
+    ----------
+    model_file: ``dict``, required.
+        Loaded checkpoint.
+    pw: ``wrapper``, required.
+        torch_scope wrapper for logging.
+    configs: ``dict``, optional, (default = "{}").
+        Additional configs.
+    """
+    def __init__(self,
+                model_file: dict,
+                pw: wrapper,
+                configs: dict = {}):
+
+        raise NotImplementedError
+
+    def decode(self, documents):
+        """
+        Decode documents.
+
+        Parameters
+        ----------
+        documents: ``list``, required.
+            List of str or list of list of str.
+        """
+        raise NotImplementedError
+
+
+class decoder_tl(decoder):
+    """
+    Decode function for AutoNER models.
+
+    Parameters
+    ----------
+    model_file: ``dict``, required.
+        Loaded checkpoint.
+    pw: ``wrapper``, required.
+        torch_scope wrapper for logging.
+    configs: ``dict``, optional, (default = "{}").
+        Additional configs.
+    """
+    def __init__(self,
+                model_file: dict,
+                pw: wrapper,
+                configs: dict = {}):
+
+        self.pw = pw
+        gpu_index = self.pw.auto_device() if 'auto' == configs.get('gpu', 'auto') else int(configs.get('gpu', 'auto'))
+        self.device = torch.device("cuda:" + str(gpu_index) if gpu_index >= 0 else "cpu")
+        if gpu_index >= 0:
+            torch.cuda.set_device(gpu_index)
+
+        name_list = ['w_map', 'c_map', 'tl_map', 'config', 'model']
+        w_map, c_map, tl_map, config, model_param = [model_file[tup] for tup in name_list]
+
+        self.pw.info('Building sequence labeling model.')
+        self.ner_model = AutoNER.from_params(config)
+        self.ner_model.load_state_dict(model_param)
+        self.ner_model.to(self.device)
+        self.ner_model.eval()
+
+        self.pw.info('Building predictor.')
+        self.predictor = predict_wc_tl(self.device, w_map, c_map, tl_map, \
+                        label_seq = configs.get("label_seq", "string"), \
+                        batch_size = configs.get("batch_size", DEFAULT_BATCH_SIZE))
+
+        self.pw.info('Model is ready.')
+
+    def decode(self, documents):
+        """
+        Decode documents.
+
+        Parameters
+        ----------
+        documents: ``list``, required.
+            List of str or list of list of str.
+        """
+        self.ner_model.eval()
+        return self.predictor.output_batch(self.ner_model, documents)
+
+
+class decoder_wc(decoder):
     """
     Decode function for char-lstm-crf model.
 
@@ -81,9 +171,11 @@ def decoder_wrapper(model_file_path: str = "http://dmserv4.cs.illinois.edu/pner0
     pw.info("Loading model from {} (might download from source if not cached).".format(model_file_path))
     model_file = wrapper.restore_checkpoint(model_file_path)
 
-    model_type = configs.get("model_type", 'char-lstm-crf')
+    model_type = model_file['config'].get("model_type", 'char-lstm-crf')
     pw.info('Preparing the pre-trained {} model.'.format(model_type))
-    model_type_dict = {"char-lstm-crf": decoder_wc}
+    model_type_dict = { \
+            "char-lstm-crf": decoder_wc,
+            "char-lstm-two-level": decoder_tl}
     return model_type_dict[model_type](model_file, pw, configs)
 
 class decode():
