@@ -125,6 +125,9 @@ class tl_predict(object):
             chunk_ind += 1
             type_ind += 1
 
+            assert (chunk_ind == len(tc_label))
+            assert (type_ind == len(tl_label))
+
             chunks.append(tmp_chunks)
 
         return chunks
@@ -180,7 +183,7 @@ class tl_predict(object):
                                 for ind in range(len(document_len) - 1)]
 
         else:
-            print("Wrong Format! Only list of str, list of list of str or list of list of list of str are accepted.")
+            raise Exception("Wrong Format! Only list of str, list of list of str or list of list of list of str are accepted.")
 
         return output_file
         

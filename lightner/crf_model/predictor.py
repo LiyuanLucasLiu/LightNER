@@ -181,7 +181,7 @@ class crf_predict(object):
                                 for ind in range(len(document_len) - 1)]
 
         else:
-            print("Wrong Format! Only list of str, list of list of str or list of list of list of str are accepted.")
+            raise Exception("Wrong Format! Only list of str, list of list of str or list of list of list of str are accepted.")
 
         return output_file
         

@@ -29,3 +29,7 @@ History
 ------------------
 * Support inference for AutoNER.
 * Modify the structure of the package.
+
+0.2.1 (2018-10-06)
+------------------
+* Small improvement
