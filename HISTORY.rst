@@ -24,3 +24,8 @@ History
 0.1.2 (2018-10-03)
 ------------------
 * Support inference for Char-LSTM-CRF (Vanilla-NER).
+
+0.2.0 (2018-10-06)
+------------------
+* Support inference for AutoNER.
+* Modify the structure of the package.

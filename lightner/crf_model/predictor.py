@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from lightner.crf_model.crf import CRFDecode
 
-class predict(object):
+class crf_predict(object):
     """Base class for prediction, provide method to calculate f1 score and accuracy 
 
     Parameters
@@ -46,7 +46,7 @@ class predict(object):
         label: ``list``, required.
             Label list.
         """
-        return '\n'.join(map(lambda t: t[0] + ' '+ self.r_y_map[t[1]], zip(feature, label)))
+        return '\n'.join(map(lambda t: t[0] + ' '+ self.r_y_map[t[1].item()], zip(feature, label)))
 
     def decode_s(self, feature, label):
         """
@@ -195,8 +195,8 @@ class predict(object):
         """
         return None
 
-class predict_wc(predict):
-    """prediction class for LM-LSTM-CRF
+class predict_wc(crf_predict):
+    """prediction class for Char-LSTM-CRF
 
     args: 
         if_cuda: if use cuda to speed up 
@@ -220,7 +220,7 @@ class predict_wc(predict):
             batch_size: int = 50,
             flm_map: dict = None, 
             blm_map: dict = None):
-        predict.__init__(self, device, y_map, label_seq, batch_size)
+        crf_predict.__init__(self, device, y_map, label_seq, batch_size)
         self.decoder = CRFDecode(y_map)
         self.gw_map = gw_map
         self.c_map = c_map

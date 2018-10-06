@@ -6,6 +6,10 @@ from setuptools import setup, find_packages
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
+def read_readme():
+    with open('README.md') as f:
+        return f.read()
+
 requirements = [
     'numpy',
     'torch-scope',
@@ -14,9 +18,9 @@ requirements = [
 
 setup(
     name='LightNER',
-    version='0.1.2',
+    version='0.2.0',
     description='A Toolkit for Pre-trained Sequence Labeling Models Inference',
-    long_description= history,
+    long_description= read_readme(),
     author='Lucas Liu',
     author_email='llychinalz@gmail.com',
     url='https://github.com/LiyuanLucasLiu/LightNER',

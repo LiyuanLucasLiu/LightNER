@@ -119,7 +119,7 @@ class SeqLabel(nn.Module):
         """
         From parameters.
         """
-
+        assert(config['model_type'] == 'char-lstm-crf')
         if 'forward_lm' in config and config['forward_lm']:
             flm = DenseLM.from_params(config['forward_lm'])
         else:
