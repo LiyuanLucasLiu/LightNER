@@ -39,10 +39,14 @@ python setup.py install
 
 ### Pre-trained Models
 
-|               | NER             | NP            |
-| ------------- |-------------    | ------------- |
-| LD-Net        | [pner0.th](http://dmserv4.cs.illinois.edu/pner0.th) | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th) |
-...
+|               | Model             | Task            | Performance            |
+| ------------- |-------------      | -------------   | -------------          |
+| LD-Net        | [pner0.th](http://dmserv4.cs.illinois.edu/pner1.th) | NER for (PER, LOC, ORG & MISC) | F1 92.21 |
+| LD-Net        | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th)   | Chunking                       | F1 95.79 |  
+| Vanilla_NER   |                                                               | NER for (PER, LOC, ORG & MISC) | |
+| Vanilla_NER   |                                                               | Chunking                       | |
+| AutoNER       |                                                               | Distant NER trained w.o. line-by-line annotations | |
+
 
 ### Decode API
 
