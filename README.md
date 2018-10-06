@@ -8,7 +8,7 @@
 A Toolkit to conduct inference with models pre-trained by:
 - [Vanilla_NER](https://github.com/LiyuanLucasLiu/Vanilla_NER): vanilla sequence labeling models.
 - [LD-Net](https://github.com/LiyuanLucasLiu/LD-Net): sequence labeling models w. efficient contextualized representation.
-- (*in progress*) [AutoNER](https://github.com/shangjingbo1226/AutoNER): distant supervised named entity recognition models (*no line-by-line annotations*).
+- [AutoNER](https://github.com/shangjingbo1226/AutoNER): distant supervised named entity recognition models (*no line-by-line annotations for training*).
 
 We are in an early-release beta. Expect some adventures and rough edges.
 
