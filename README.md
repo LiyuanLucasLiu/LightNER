@@ -52,7 +52,7 @@ python setup.py install
 
 |               | Model             | Task            | Performance            |
 | ------------- |-------------      | -------------   | -------------          |
-| LD-Net        | [pner0.th](http://dmserv4.cs.illinois.edu/pner1.th) | NER for (PER, LOC, ORG & MISC) | F1 92.21 |
+| LD-Net        | [pner1.th](http://dmserv4.cs.illinois.edu/pner1.th) | NER for (PER, LOC, ORG & MISC) | F1 92.21 |
 | LD-Net        | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th)   | Chunking                       | F1 95.79 |  
 | Vanilla_NER   |                                                               | NER for (PER, LOC, ORG & MISC) | |
 | Vanilla_NER   |                                                               | Chunking                       | |
