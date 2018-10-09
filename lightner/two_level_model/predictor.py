@@ -108,11 +108,11 @@ class tl_predict(object):
 
                 if tc_label[chunk_ind] > 0:
                     if previous_type != "None":
-                        tmp_chunks += "</{}>".format(previous_type)
+                        tmp_chunks += "</{}> ".format(previous_type)
                     previous_type = self.r_tl_map[tl_label[type_ind].item()]
                     type_ind += 1
                     if previous_type != "None":
-                        tmp_chunks += "<{}>".format(previous_type)
+                        tmp_chunks += "<{}> ".format(previous_type)
                     tmp_chunks += word + ' '
                 else:
                     tmp_chunks += word + ' '
@@ -125,10 +125,12 @@ class tl_predict(object):
             chunk_ind += 1
             type_ind += 1
 
-            assert (chunk_ind == len(tc_label))
-            assert (type_ind == len(tl_label))
+            tmp_chunks = tmp_chunks.rstrip()
 
             chunks.append(tmp_chunks)
+
+        assert (chunk_ind == len(tc_label))
+        assert (type_ind == len(tl_label) + 1)
 
         return chunks
 

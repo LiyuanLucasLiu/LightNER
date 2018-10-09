@@ -284,11 +284,11 @@ class predict_wc(crf_predict):
             if self.flm_map and self.blm_map:
                 flm_f = [self.flm_map.get(tup, self.flm_unk) for tup in features[instance_ind]]
                 blm_f = [self.blm_map.get(tup, self.blm_unk) for tup in features[instance_ind]]
-                tmp_batch[0].append(flm_f + [self.flm_pad] + [self.flm_pad] * word_padded_len_ins)
-                tmp_batch[1].append([self.blm_pad] + blm_f[::-1] + [self.blm_pad] * word_padded_len_ins)
+                lm_batch[0].append(flm_f + [self.flm_pad] + [self.flm_pad] * word_padded_len_ins)
+                lm_batch[1].append([self.blm_pad] + blm_f[::-1] + [self.blm_pad] * word_padded_len_ins)
 
                 tmp_p = list(range(len(blm_f), -1, -1)) + list(range(len(blm_f)+1, word_padded_len+1))
-                tmp_batch[2].append([x * cur_batch_size + instance_ind for x in tmp_p])
+                lm_batch[2].append([x * cur_batch_size + instance_ind for x in tmp_p])
 
 
         tbt = [torch.LongTensor(v).transpose(0, 1).contiguous() for v in tmp_batch[0:5]] + [torch.ByteTensor(tmp_batch[5]).transpose(0, 1).contiguous()]
