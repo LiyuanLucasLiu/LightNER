@@ -56,7 +56,7 @@ python setup.py install
 | LD-Net        | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th)   | Chunking                       | F1 95.79 |  
 | Vanilla_NER   |                                                               | NER for (PER, LOC, ORG & MISC) | |
 | Vanilla_NER   |                                                               | Chunking                       | |
-| AutoNER       | [autoner0.th](http://dmserv4.cs.illinois.edu/bioner_models/autoner0.th)                                                              | Distant NER trained w.o. line-by-line annotations (Disease, Chemical) | 85.30 |
+| AutoNER       | [autoner0.th](http://dmserv4.cs.illinois.edu/bioner_models/autoner0.th)                                                              | Distant NER trained w.o. line-by-line annotations (Disease, Chemical) | F1 85.30 |
 
 
 ### Decode API
