@@ -12,7 +12,7 @@
   - **[LD-Net](https://github.com/LiyuanLucasLiu/LD-Net)**: train NER models w. efficient contextualized representations.
   - **[VanillaNER](https://github.com/LiyuanLucasLiu/Vanilla_NER)**: train vanilla NER models w. pre-trained embedding.
 - **Distant Training**:
-  - **[AutoNER](https://shangjingbo1226.github.io/AutoNER/)**: train NER models w.o. line-by-line annotations and get competitive performance.
+  - **[AutoNER](https://github.com/shangjingbo1226/AutoNER)**: train NER models w.o. line-by-line annotations and get competitive performance.
 
 --------------------------------
 
@@ -52,11 +52,11 @@ python setup.py install
 
 |               | Model             | Task            | Performance            |
 | ------------- |-------------      | -------------   | -------------          |
-| LD-Net        | [pner1.th](http://dmserv4.cs.illinois.edu/pner1.th) | NER for (PER, LOC, ORG & MISC) | F1 92.21 |
-| LD-Net        | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th)   | Chunking                       | F1 95.79 |  
+| [LD-Net](https://github.com/LiyuanLucasLiu/LD-Net)        | [pner1.th](http://dmserv4.cs.illinois.edu/pner1.th) | NER for (PER, LOC, ORG & MISC) | F1 92.21 |
+| [LD-Net](https://github.com/LiyuanLucasLiu/LD-Net)        | [pnp0.th](http://dmserv4.cs.illinois.edu/pnp0.th)   | Chunking                       | F1 95.79 |  
 | Vanilla_NER   |                                                               | NER for (PER, LOC, ORG & MISC) | |
 | Vanilla_NER   |                                                               | Chunking                       | |
-| AutoNER       | [autoner0.th](http://dmserv4.cs.illinois.edu/bioner_models/autoner0.th)                                                              | Distant NER trained w.o. line-by-line annotations (Disease, Chemical) | F1 85.30 |
+| [AutoNER](https://github.com/shangjingbo1226/AutoNER)       | [autoner0.th](http://dmserv4.cs.illinois.edu/bioner_models/autoner0.th)                                                              | Distant NER trained w.o. line-by-line annotations (Disease, Chemical) | F1 85.30 |
 
 
 ### Decode API
