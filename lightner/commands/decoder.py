@@ -16,7 +16,7 @@ DEFAULT_BATCH_SIZE = 50
 
 class decoder(object):
     """
-    Abstract class for decoder..
+    Abstract class for decoder.
 
     Parameters
     ----------
@@ -93,7 +93,7 @@ class decoder_tl(decoder):
         Parameters
         ----------
         documents: ``list``, required.
-            List of str or list of list of str.
+            List of str or list of list of str or str.
         """
         self.ner_model.eval()
         return self.predictor.output_batch(self.ner_model, documents)
